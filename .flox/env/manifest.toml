@@ -5,12 +5,12 @@ python3.pkg-path = "python3"
 postgresql.pkg-path = "postgresql"
 
 [vars]
-POSTGRES_USER = "user"
-POSTGRES_PASSWORD = "secret"
-POSTGRES_DB = "app"
+POSTGRES_USER = "app_user"
+POSTGRES_PASSWORD = "app_secret"
+POSTGRES_DB = "app_db"
 POSTGRES_HOST = "127.0.0.1"
 POSTGRES_PORT = "5432"
-DATABASE_URL = "postgresql+psycopg://user:secret@127.0.0.1:5432/app"
+DATABASE_URL = "postgresql://app_user:app_secret@127.0.0.1:5432/app_db"
 
 
 [hook]
@@ -95,8 +95,8 @@ until pg_isready -h 127.0.0.1 -p 5432; do
   sleep 1
 done
 
-createuser -h 127.0.0.1 user 2>/dev/null || true
-createdb -h 127.0.0.1 -O user app 2>/dev/null || true
+createuser -h 127.0.0.1 app_user 2>/dev/null || true
+createdb -h 127.0.0.1 -O app_user app_db 2>/dev/null || true
 
 wait $!
 """
