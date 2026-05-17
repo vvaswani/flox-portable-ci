@@ -95,7 +95,8 @@ until pg_isready -h 127.0.0.1 -p 5432; do
   sleep 1
 done
 
-createuser -h 127.0.0.1 user 2>/dev/null || true
+psql -h 127.0.0.1 -U "$(whoami)" -d postgres -c "CREATE ROLE user LOGIN PASSWORD 'secret';" 2>/dev/null || true
+
 createdb -h 127.0.0.1 -O user app 2>/dev/null || true
 
 wait
