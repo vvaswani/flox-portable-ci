@@ -30,7 +30,7 @@
     "options": {},
     "services": {
       "postgres": {
-        "command": "export PGDATA=\"$(pwd)/.flox/postgres\"\nexport PGSOCKET=\"$(pwd)/.flox/run\"\n\nmkdir -p \"$PGDATA\"\nmkdir -p \"$PGSOCKET\"\n\nif [ ! -f \"$PGDATA/PG_VERSION\" ]; then\n  initdb --auth=trust -D \"$PGDATA\"\nfi\n\npostgres -D \"$PGDATA\" -h 127.0.0.1 -k \"$PGSOCKET\" -p 5432 &\n\nuntil pg_isready -h 127.0.0.1 -p 5432; do\n  sleep 1\ndone\n\ncreateuser -h 127.0.0.1 user 2>/dev/null || true\ncreatedb -h 127.0.0.1 -O user app 2>/dev/null || true\n\nwait\n"
+        "command": "export PGDATA=\"$(pwd)/.flox/postgres\"\nexport PGSOCKET=\"$(pwd)/.flox/run\"\n\nmkdir -p \"$PGDATA\"\nmkdir -p \"$PGSOCKET\"\n\nif [ ! -f \"$PGDATA/PG_VERSION\" ]; then\n  initdb --auth=trust -D \"$PGDATA\"\nfi\n\npostgres -D \"$PGDATA\" -h 127.0.0.1 -k \"$PGSOCKET\" -p 5432 &\n\nuntil pg_isready -h 127.0.0.1 -p 5432; do\n  sleep 1\ndone\n\ncreateuser -h 127.0.0.1 user 2>/dev/null || true\ncreatedb -h 127.0.0.1 -O user app 2>/dev/null || true\n\nwait $!\n"
       }
     }
   },
