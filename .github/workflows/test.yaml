@@ -1,0 +1,25 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flox
+        uses: flox/install-flox-action@v2
+
+      - name: Activate Flox environment
+        uses: flox/activate-action@v1
+
+      - name: Start PostgreSQL service
+        run: flox services start postgres
+
+      - name: Run tests
+        run: pytest
