@@ -98,5 +98,9 @@ done
 createuser -h 127.0.0.1 app_user 2>/dev/null || true
 createdb -h 127.0.0.1 -O app_user app_db 2>/dev/null || true
 
+until psql -h 127.0.0.1 -U app_user -d app_db -c "SELECT 1" 2>/dev/null; do
+  sleep 1
+done
+
 wait $!
 """
