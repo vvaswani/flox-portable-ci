@@ -18,4 +18,9 @@ jobs:
       - name: Start services and run tests
         uses: flox/activate-action@v1
         with:
-          command: flox services start postgres && pytest
+          command: |
+            flox services start postgres
+            until psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1" >/dev/null 2>&1; do
+              sleep 1
+            done
+            pytest
