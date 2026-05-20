@@ -11,8 +11,8 @@
       }
     },
     "vars": {
-      "DATABASE_URL": "postgresql://app_user:app_secret@127.0.0.1:5432/app_db",
-      "POSTGRES_DB": "app_db",
+      "DATABASE_URL": "postgresql://app_user:app_secret@127.0.0.1:5432/postgres",
+      "POSTGRES_DB": "postgres",
       "POSTGRES_HOST": "127.0.0.1",
       "POSTGRES_PASSWORD": "app_secret",
       "POSTGRES_PORT": "5432",
@@ -30,7 +30,7 @@
     "options": {},
     "services": {
       "postgres": {
-        "command": "export PGDATA=\"$(pwd)/.flox/postgres\"\nexport PGSOCKET=\"$(pwd)/.flox/run\"\nexport ADMIN_USER=\"$(id -un)\"\n\nmkdir -p \"$PGDATA\"\nmkdir -p \"$PGSOCKET\"\n\nif [ ! -f \"$PGDATA/PG_VERSION\" ]; then\n  initdb --auth=trust -D \"$PGDATA\"\nfi\n\npostgres -D \"$PGDATA\" -h 127.0.0.1 -k \"$PGSOCKET\" -p 5432 &\n\nuntil pg_isready -h 127.0.0.1 -p 5432; do\n  sleep 1\ndone\n\nif ! psql -h \"$POSTGRES_HOST\" -p \"$POSTGRES_PORT\" -U \"$ADMIN_USER\" -d postgres -tAc \"SELECT 1 FROM pg_roles WHERE rolname = '$POSTGRES_USER'\" | grep -q 1; then\n  psql -h \"$POSTGRES_HOST\" -p \"$POSTGRES_PORT\" -U \"$ADMIN_USER\" -d postgres -c \"CREATE ROLE \\\"$POSTGRES_USER\\\" LOGIN PASSWORD '$POSTGRES_PASSWORD';\"\nfi\n\nif ! psql -h \"$POSTGRES_HOST\" -p \"$POSTGRES_PORT\" -U \"$ADMIN_USER\" -d postgres -tAc \"SELECT 1 FROM pg_database WHERE datname = '$POSTGRES_DB'\" | grep -q 1; then\n  psql -h \"$POSTGRES_HOST\" -p \"$POSTGRES_PORT\" -U \"$ADMIN_USER\" -d postgres -c \"CREATE DATABASE \\\"$POSTGRES_DB\\\" OWNER \\\"$POSTGRES_USER\\\";\"\nfi\n\nuntil psql -h \"$POSTGRES_HOST\" -p \"$POSTGRES_PORT\" -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -c \"SELECT 1\" 2>/dev/null; do\n  sleep 1\ndone\n\nwait $!\n"
+        "command": "export PGDATA=\"$(pwd)/.flox/postgres\"\nexport PGSOCKET=\"$(pwd)/.flox/run\"\n\nmkdir -p \"$PGDATA\"\nmkdir -p \"$PGSOCKET\"\n\nif [ ! -f \"$PGDATA/PG_VERSION\" ]; then\n  initdb --auth=trust --username=\"$POSTGRES_USER\" -D \"$PGDATA\"\nfi\n\npostgres -D \"$PGDATA\" -h 127.0.0.1 -k \"$PGSOCKET\" -p 5432 &\n\nuntil pg_isready -h 127.0.0.1 -p 5432; do\n  sleep 1\ndone\n\nuntil psql -h \"$POSTGRES_HOST\" -p \"$POSTGRES_PORT\" -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -c \"SELECT 1\" 2>/dev/null; do\n  sleep 1\ndone\n\nwait $!\n"
       }
     }
   },
