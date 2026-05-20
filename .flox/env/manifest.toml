@@ -77,6 +77,7 @@ zsh = """
 command = """
 export PGDATA="$(pwd)/.flox/postgres"
 export PGSOCKET="$(pwd)/.flox/run"
+export ADMIN_USER="$(id -un)"
 
 mkdir -p "$PGDATA"
 mkdir -p "$PGSOCKET"
@@ -95,10 +96,15 @@ until pg_isready -h 127.0.0.1 -p 5432; do
   sleep 1
 done
 
-createuser -h 127.0.0.1 app_user 2>/dev/null || true
-createdb -h 127.0.0.1 -O app_user app_db 2>/dev/null || true
+if ! psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$ADMIN_USER" -d postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname = '$POSTGRES_USER'" | grep -q 1; then
+  psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$ADMIN_USER" -d postgres -c "CREATE ROLE \\"$POSTGRES_USER\\" LOGIN PASSWORD '$POSTGRES_PASSWORD';"
+fi
 
-until psql -h 127.0.0.1 -U app_user -d app_db -c "SELECT 1" 2>/dev/null; do
+if ! psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$ADMIN_USER" -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$POSTGRES_DB'" | grep -q 1; then
+  psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$ADMIN_USER" -d postgres -c "CREATE DATABASE \\"$POSTGRES_DB\\" OWNER \\"$POSTGRES_USER\\";"
+fi
+
+until psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1" 2>/dev/null; do
   sleep 1
 done
 
