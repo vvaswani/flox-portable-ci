@@ -15,11 +15,7 @@ jobs:
       - name: Install Flox
         uses: flox/install-flox-action@v2
 
-      - name: Activate Flox environment
+      - name: Start services and run tests
         uses: flox/activate-action@v1
-
-      - name: Start PostgreSQL service
-        run: flox services start postgres
-
-      - name: Run tests
-        run: pytest
+        with:
+          command: flox services start postgres && pytest
